@@ -35,13 +35,4 @@ Quick script to make sure PRs are linked to issues, in the right milestone and p
 		Milestone: v1.21.3+rke2r2 - Done Issue / Merged PR
 		Tag:       v1.21.3-rc5+rke2r2
 		Closed by: @rancher-max
-
-[Release 1.21] - update labels to be annotations by @briandowns	https://github.com/rancher/rke2/pull/1535
-	[open] Adding annotations to PSPs	https://github.com/rancher/rke2/issues/1512
-		Milestone: v1.22.0+rke2r1 - To Test
-		Tag:       v1.21.3-rc5+rke2r2
-	[closed] [Release 1.21] - Adding annotations to PSPs	https://github.com/rancher/rke2/issues/1518
-		Milestone: v1.21.3+rke2r2 - Done Issue / Merged PR
-		Tag:       v1.21.3-rc5+rke2r2
-		Closed by: @rancher-max
 ```
