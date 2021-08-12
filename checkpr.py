@@ -66,7 +66,7 @@ def main(repo, token, branch, repos):
             print(f"\t\tMilestone: {milestone} {project_column}")
 
             if repo_ok and gh_pull.merge_commit_sha:
-                (exitcode, output) = subprocess.getstatusoutput(f"git --git-dir={repos}/{repo}/.git tag --sort=-committerdate --contains={gh_pull.merge_commit_sha} | grep -v '^[^+]+-'")
+                (exitcode, output) = subprocess.getstatusoutput(f"git --git-dir={repos}/{repo}/.git tag --sort=-committerdate --contains={gh_pull.merge_commit_sha}")
                 if output and exitcode == 0:
                     print(f"\t\tTag:       {output.splitlines()[0]}")
 

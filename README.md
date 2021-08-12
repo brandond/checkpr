@@ -4,33 +4,44 @@ Quick script to make sure PRs are linked to issues, in the right milestone and p
 
 ### Sample Output
 ```console
-[Release-1.21] Upgrade k3s in 1.21 by @galal-hussein	https://github.com/rancher/rke2/pull/1490
-	[closed] [Release-1.21] Systemd does not get notified with READY state in etcd only nodes	https://github.com/rancher/rke2/issues/1485
-		Milestone: v1.21.4+rke2r1 - Done Issue / Merged PR
-		Closed by: @rancher-max
+[Backport 1.21] Bumped k3s version to bring in updated HNS Network  call. by @phillipsj	https://github.com/rancher/rke2/pull/1606
+	[open] [Backport 1.21] The waitManagementIP function in pkg/daemons/agent/agent_windows.go is calling the incorrect HNS function.	https://github.com/rancher/rke2/issues/1604
+		Milestone: v1.21.3+rke2r2 - To Test
+		Tag:       v1.21.3-rc5+rke2r2
 
-[release 1.21] bump versions in Windows Dockerfile by @rosskirkpat	https://github.com/rancher/rke2/pull/1484
-	[closed] [release 1.21] bump versions in Windows Dockerfile 	https://github.com/rancher/rke2/issues/1482
+[Release 1.21] - Update k3s to resolve for s3 folder handling when listing snapshots by @briandowns	https://github.com/rancher/rke2/pull/1601
+	[open] s3 snapshots do not show in the rancher 2.6 UI	https://github.com/rancher/rke2/issues/1551
+		Milestone: v1.22.0+rke2r1 - To Test
+		Tag:       v1.21.3-rc5+rke2r2
+
+[release 1.21] bump calico to 3.19.2 by @rosskirkpat	https://github.com/rancher/rke2/pull/1594
+	[open] [release 1.21] bump calico to 3.19.2	https://github.com/rancher/rke2/issues/1593
+		Milestone: v1.21.3+rke2r2 - To Test
+		Tag:       v1.21.3-rc5+rke2r2
+
+[release-1.21] Update Calico version to v3.19.2 by @manuelbuil	https://github.com/rancher/rke2/pull/1587
+	[open] [release-1.21] RKE2 Cluster running Calico seemingly losing UDP traffic when transiting through service IP to remotely located pod	https://github.com/rancher/rke2/issues/1586
+		Milestone: v1.21.4+rke2r1 - To Test
+		Tag:       v1.21.3-rc5+rke2r2
+
+[release-1.21] Bump hardened-kubernetes to v1.21.3-rke2r2 by @brandond	https://github.com/rancher/rke2/pull/1583
+	[closed] [release-1.21] Cluster is stuck in upgrading state when upgrading to v1.21.3-rc4+rke2r2	https://github.com/rancher/rke2/issues/1581
 		Milestone: v1.21.3+rke2r2 - Done Issue / Merged PR
+		Tag:       v1.21.3-rc5+rke2r2
 		Closed by: @rancher-max
 
-[backport-1.21] Bump ingress-nginx chart to 3.34.002 by @erikwilson	https://github.com/rancher/rke2/pull/1478
-	[closed] Default deployment of rke2-ingress-nginx has load balancer service enabled in RKE2 1.21.2	https://github.com/rancher/rke2/issues/1446
+[Release-1.21] Update k3s to fix node stuck on removal by @galal-hussein	https://github.com/rancher/rke2/pull/1543
+	[closed] [Release-1.21] Node stuck at deletion due to finalizer 	https://github.com/rancher/rke2/issues/1561
 		Milestone: v1.21.3+rke2r2 - Done Issue / Merged PR
+		Tag:       v1.21.3-rc5+rke2r2
 		Closed by: @rancher-max
 
-moving all steps into one pipeline for dist dir to be available by @luthermonson	https://github.com/rancher/rke2/pull/1440
-	NO LINKED ISSUES FOUND
-
-[Release-1.21] Upgrade k3s bootstrap 121 by @galal-hussein	https://github.com/rancher/rke2/pull/1428
-	[closed] [1.21 backport] Agent nodes fail to upgrade via SUC	https://github.com/rancher/rke2/issues/1416
-		Milestone: v1.21.3+rke2r1 - Done Issue / Merged PR
-		Tag:       v1.21.3+rke2r1
-		Closed by: @rancher-max
-
-[release-1.21] Bump kubernetes versions to GA build by @brandond	https://github.com/rancher/rke2/pull/1421
-	[closed] [release-1.21] kubectl version should show same tag as RKE2 tag	https://github.com/rancher/rke2/issues/1425
-		Milestone: v1.21.3+rke2r1 - Done Issue / Merged PR
-		Tag:       v1.21.3+rke2r1
+[Release 1.21] - update labels to be annotations by @briandowns	https://github.com/rancher/rke2/pull/1535
+	[open] Adding annotations to PSPs	https://github.com/rancher/rke2/issues/1512
+		Milestone: v1.22.0+rke2r1 - To Test
+		Tag:       v1.21.3-rc5+rke2r2
+	[closed] [Release 1.21] - Adding annotations to PSPs	https://github.com/rancher/rke2/issues/1518
+		Milestone: v1.21.3+rke2r2 - Done Issue / Merged PR
+		Tag:       v1.21.3-rc5+rke2r2
 		Closed by: @rancher-max
 ```
