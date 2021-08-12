@@ -6,6 +6,7 @@ import re
 import click
 import github
 import subprocess
+import os.path
 from github import Github
 
 
@@ -25,6 +26,14 @@ def main(repo, token, branch, repos):
         kwargs['base'] = branch
 
     repo_ok = False
+
+    if not repos:
+        gopath = os.getenv("GOPATH") or os.path.join(getenv("HOME"), "go")
+        go_repos = os.path.join(gopath, "src", "github.com")
+        if os.path.exists(go_repos):
+            repos = go_repos
+            print(f"Using repos from GOPATH: {repos}")
+
     if repos:
         print(f"Fetching tags in {repos}/{repo}...")
         (exitcode, output) = subprocess.getstatusoutput(f"git --git-dir={repos}/{repo}/.git fetch --tags")
@@ -63,7 +72,9 @@ def main(repo, token, branch, repos):
                 if gh_event.event == 'moved_columns_in_project':
                     project_column = "- " + gh_event.__dict__['_rawData']['project_card']['column_name']
 
-            print(f"\t\tMilestone: {milestone} {project_column}")
+            assignees = ' '.join(map(lambda a: '@' + a.login, gh_issue.assignees))
+
+            print(f"\t\tMilestone: {milestone} {project_column}\t{assignees}")
 
             if repo_ok and gh_pull.merge_commit_sha:
                 (exitcode, output) = subprocess.getstatusoutput(f"git --git-dir={repos}/{repo}/.git tag --sort=committerdate --contains={gh_pull.merge_commit_sha}")
