@@ -114,20 +114,28 @@ def main(repo, token, branch, repos):
                             ga_tag = tag
                     if ga_tag:
                         tag = ga_tag
+
+                    if project_column and semver(tag) != semver(milestone):
+                        tag = colored(tag, 'red', attrs=['bold'])
                     print(f"\t     | Tag:       {tag}")
 
             if gh_issue.state == "closed":
                 print(f"\t     | Closed by: @{gh_issue.closed_by.login}")
 
+def semver(version):
+    m = re.search('(\d+\.\d+\.\d+)', version)
+    if m:
+        return m.group(0)
+    return version
 
 def get_events(self):
-            return github.PaginatedList.PaginatedList(
-            github.IssueEvent.IssueEvent,
-            self._requester,
-            f"{self.url}/events",
-            None,
-            headers={"Accept": "application/vnd.github.starfox-preview+json"},
-        )
+    return github.PaginatedList.PaginatedList(
+        github.IssueEvent.IssueEvent,
+        self._requester,
+        f"{self.url}/events",
+        None,
+        headers={"Accept": "application/vnd.github.starfox-preview+json"},
+    )
 
 if __name__ == "__main__":
     try:
