@@ -43,24 +43,33 @@ def main(repo, token, branch, repos):
     for gh_pull in gh_repo.get_pulls(state='closed', **kwargs):
         if not gh_pull.merged:
             continue
-        print(f"\n{gh_pull.title} by @{gh_pull.user.login}\t{gh_pull.html_url}")
+        print(f"\n{gh_pull.base.ref:>12} | {gh_pull.title} by @{gh_pull.user.login}\t{gh_pull.html_url}")
+
         matches =  issue_re.findall(gh_pull.body or "")
         if not matches:
-            print("\tNO LINKED ISSUES FOUND")
+            print("\t     | NO LINKED ISSUES FOUND")
+
+        seen_ids = set()
         for match in matches:
-            issue = int(match[1])
             try:
-                gh_issue = gh_repo.get_issue(issue)
+                gh_issue = gh_repo.get_issue(int(match[1]))
                 gh_issue.__class__.get_events = get_events
             except Exception:
-                print(f"\tIssue #{issue} not found")
+                print(f"\t     | Issue #{match[1]} not found")
                 continue
 
+            if gh_issue.id in seen_ids:
+                continue
+
+            seen_ids.add(gh_issue.id)
+            state = gh_issue.state
             if gh_issue.pull_request and gh_issue.pull_request.html_url == gh_issue.html_url:
-                print(f"\t[pr]   {gh_issue.title}\t{gh_issue.html_url}")
-                continue
+                state = 'pr'
 
-            print(f"\t[{gh_issue.state}] {gh_issue.title}\t{gh_issue.html_url}")
+            print(f"      {state:>6} | {gh_issue.title}\t{gh_issue.html_url}")
+
+            if state == 'pr':
+                continue
 
             milestone = "NO MILESTONE"
             project_column= ""
@@ -74,7 +83,7 @@ def main(repo, token, branch, repos):
 
             assignees = ' '.join(map(lambda a: '@' + a.login, gh_issue.assignees))
 
-            print(f"\t\tMilestone: {milestone} {project_column}\t{assignees}")
+            print(f"\t     | Milestone: {milestone} {project_column}\t{assignees}")
 
             if repo_ok and gh_pull.merge_commit_sha:
                 (exitcode, output) = subprocess.getstatusoutput(f"git --git-dir={repos}/{repo}/.git tag --sort=committerdate --contains={gh_pull.merge_commit_sha}")
@@ -86,10 +95,10 @@ def main(repo, token, branch, repos):
                             ga_tag = tag
                     if ga_tag:
                         tag = ga_tag
-                    print(f"\t\tTag:       {tag}")
+                    print(f"\t     | Tag:       {tag}")
 
             if gh_issue.state == "closed":
-                print(f"\t\tClosed by: @{gh_issue.closed_by.login}")
+                print(f"\t     | Closed by: @{gh_issue.closed_by.login}")
 
 
 def get_events(self):
@@ -102,4 +111,7 @@ def get_events(self):
         )
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except github.GithubException as ex:
+        print(f"Github API error {ex.status}: {ex.data['message']}")
