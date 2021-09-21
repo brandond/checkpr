@@ -8,6 +8,7 @@ import github
 import subprocess
 import os.path
 from github import Github
+from termcolor import colored
 
 
 @click.command()
@@ -47,7 +48,7 @@ def main(repo, token, branch, repos):
 
         matches =  issue_re.findall(gh_pull.body or "")
         if not matches:
-            print("\t     | NO LINKED ISSUES FOUND")
+            print("\t     | " + colored('NO LINKED ISSUES FOUND', 'white', attrs=['bold']))
 
         seen_ids = set()
         for match in matches:
@@ -66,9 +67,16 @@ def main(repo, token, branch, repos):
             if gh_issue.pull_request and gh_issue.pull_request.html_url == gh_issue.html_url:
                 state = 'pr'
 
-            print(f"      {state:>6} | {gh_issue.title}\t{gh_issue.html_url}")
+            if state == 'open':
+                state = colored(f"{state:>6}", 'green')
+            elif state == 'closed':
+                state = colored(f"{state:>6}", 'red')
+            else:
+                state = colored(f"{state:>6}", 'magenta')
 
-            if state == 'pr':
+            print(f"      {state} | {gh_issue.title}\t{gh_issue.html_url}")
+
+            if 'pr' in state:
                 continue
 
             milestone = "NO MILESTONE"
@@ -79,9 +87,20 @@ def main(repo, token, branch, repos):
 
             for gh_event in gh_issue.get_events():
                 if gh_event.event == 'moved_columns_in_project':
-                    project_column = "- " + gh_event.__dict__['_rawData']['project_card']['column_name']
+                    project_column = gh_event.__dict__['_rawData']['project_card']['column_name']
 
             assignees = ' '.join(map(lambda a: '@' + a.login, gh_issue.assignees))
+
+            if 'NO MILESTONE' in milestone:
+                milestone = colored(milestone, 'white', attrs=['bold'])
+
+            if 'Done' in project_column:
+                project_column = '- ' + colored(project_column, 'red')
+            elif 'Test' in project_column:
+                project_column = '- ' + colored(project_column, 'yellow')
+            elif project_column:
+                project_column = '- ' + colored(project_column, 'green')
+
 
             print(f"\t     | Milestone: {milestone} {project_column}\t{assignees}")
 
