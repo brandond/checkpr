@@ -44,7 +44,8 @@ def main(repo, token, branch, repos):
     for gh_pull in gh_repo.get_pulls(state='closed', **kwargs):
         if not gh_pull.merged:
             continue
-        print(f"\n{gh_pull.base.ref:>12} | {gh_pull.title} by @{gh_pull.user.login}\t{gh_pull.html_url}")
+        print(f"\n{gh_pull.base.ref:>12} | {gh_pull.title} by @{gh_pull.user.login}\t{colored(gh_pull.html_url, 'white', attrs=['underline'])}")
+        padwidth = len(f"{gh_pull.title} by @{gh_pull.user.login}")
 
         matches =  issue_re.findall(gh_pull.body or "")
         if not matches:
@@ -74,7 +75,7 @@ def main(repo, token, branch, repos):
             else:
                 state = colored(f"{state:>6}", 'magenta')
 
-            print(f"      {state} | {gh_issue.title}\t{gh_issue.html_url}")
+            print(f"      {state} | {gh_issue.title:<{padwidth}}\t{colored(gh_issue.html_url, 'white', attrs=['underline'])}")
 
             if 'pr' in state:
                 continue
