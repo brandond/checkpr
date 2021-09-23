@@ -13,59 +13,39 @@ from termcolor import colored
 
 @click.command()
 @click.argument('repo')
-@click.argument('commit1')
-@click.argument('commit2')
+@click.argument('base')
+@click.argument('head')
 @click.option('--token', help='Github auth token', envvar='GITHUB_TOKEN', required=True)
-@click.option('--repos', help='Path to directory containing git repos, such as $HOME/go/src/github.com', type=click.Path(exists=True, file_okay=False))
-def main(repo, commit1, commit2, token, repos):
-    issue_re = re.compile(f"({repo}/issues/|{repo}#|\W#)(\d+)")
+def main(repo, base, head, token):
     gh = Github(token)
-
     gh_repo = gh.get_repo(repo)
-    kwargs = {}
 
-    repo_ok = False
+    seen_prs = set()
+    for gh_commit in gh_repo.compare(base, head).commits:
+        if len(gh_commit.parents) > 1:
+            continue
+        for gh_pull in gh_commit.get_pulls():
+            if gh_pull.number not in seen_prs:
+                seen_prs.add(gh_pull.number)
+                title = gh_pull.title
+                m = re.search(r'```release-note\s*(.+)\s*```', gh_pull.body)
+                if m:
+                    release_note = m.group(1).strip()
+                    if release_note and release_note != 'NONE':
+                        title = release_note
+                print(f"* {title} ([#{gh_pull.number}]({gh_pull.html_url}))  ")
 
-    if not repos:
-        gopath = os.getenv("GOPATH") or os.path.join(getenv("HOME"), "go")
-        go_repos = os.path.join(gopath, "src", "github.com")
-        if os.path.exists(go_repos):
-            repos = go_repos
-            print(f"Using repos from GOPATH: {repos}")
-
-    if repos:
-        print(f"Fetching tags in {repos}/{repo}...")
-        (exitcode, output) = subprocess.getstatusoutput(f"git --git-dir={repos}/{repo}/.git fetch --tags")
-        print(output)
-        repo_ok = exitcode == 0
-
-    if not repo_ok:
-        print("Error: must have repo available")
-        exit(1)
-
-    (exitcode, output) = subprocess.getstatusoutput(f"git --git-dir={repos}/{repo}/.git log --no-merges --format=format:%H {commit1}..{commit2}")
-    if output and exitcode == 0:
-        seen_prs = set()
-        for commit in output.splitlines():
-            gh_commit = gh_repo.get_commit(commit)
-            for gh_pull in gh_commit.get_pulls():
-                if gh_pull.number not in seen_prs:
-                    seen_prs.add(gh_pull.number)
-                    title = gh_pull.title
-                    m = re.search(r'```release-note\s*(.+)\s*```', gh_pull.body)
-                    if m:
-                        release_note = m.group(1).strip()
-                        if release_note and release_note != 'NONE':
-                            title = release_note
-                    print(f"* {title} ([#{gh_pull.number}]({gh_pull.html_url}))  ")
-                    print("  <!---")
-                    for gh_file in gh_commit.files:
-                        print(f"  {gh_file.filename}")
-                    print("  --->")
-
-    else:
-        print(f"Error: git log failed\n{output}")
-        exit(1)
+        print("  <!---")
+        print(f"  {gh_commit.commit.message.splitlines()[0]}")
+        vendor_files = 0
+        for gh_file in gh_commit.files:
+            if gh_file.filename.startswith("vendor/"):
+                vendor_files += 1
+            else:
+                print(f"    {gh_file.filename}")
+        if vendor_files:
+                print(f"    vendor/...  ({vendor_files} files not listed)")
+        print("  --->")
 
 
 if __name__ == "__main__":
