@@ -1,14 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import re
 import click
 import github
-import subprocess
-import os.path
 from github import Github
-from termcolor import colored
 
 
 @click.command()
@@ -44,7 +40,7 @@ def main(repo, base, head, token):
             else:
                 print(f"    {gh_file.filename}")
         if vendor_files:
-                print(f"    vendor/...  ({vendor_files} files not listed)")
+            print(f"    vendor/...  ({vendor_files} files not listed)")
         print("  --->")
 
 

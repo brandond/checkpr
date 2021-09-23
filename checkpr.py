@@ -17,7 +17,7 @@ from termcolor import colored
 @click.option('--branch', help='Branch to check; default all')
 @click.option('--repos', help='Path to directory containing git repos, such as $HOME/go/src/github.com', type=click.Path(exists=True, file_okay=False))
 def main(repo, token, branch, repos):
-    issue_re = re.compile(f"({repo}/issues/|{repo}#|\W#)(\d+)")
+    issue_re = re.compile(fr"({repo}/issues/|{repo}#|\W#)(\d+)")
     gh = Github(token)
 
     gh_repo = gh.get_repo(repo)
@@ -29,7 +29,7 @@ def main(repo, token, branch, repos):
     repo_ok = False
 
     if not repos:
-        gopath = os.getenv("GOPATH") or os.path.join(getenv("HOME"), "go")
+        gopath = os.getenv("GOPATH") or os.path.join(os.getenv("HOME"), "go")
         go_repos = os.path.join(gopath, "src", "github.com")
         if os.path.exists(go_repos):
             repos = go_repos
@@ -47,7 +47,7 @@ def main(repo, token, branch, repos):
         print(f"\n{gh_pull.base.ref:>12} | {gh_pull.title} by @{gh_pull.user.login}\t{colored(gh_pull.html_url, 'white', attrs=['underline'])}")
         padwidth = len(f"{gh_pull.title} by @{gh_pull.user.login}")
 
-        matches =  issue_re.findall(gh_pull.body or "")
+        matches = issue_re.findall(gh_pull.body or "")
         if not matches:
             print("\t     | " + colored('NO LINKED ISSUES FOUND', 'white', attrs=['bold']))
 
@@ -81,7 +81,7 @@ def main(repo, token, branch, repos):
                 continue
 
             milestone = "NO MILESTONE"
-            project_column= ""
+            project_column = ""
 
             if gh_issue.milestone:
                 milestone = gh_issue.milestone.title
@@ -102,11 +102,11 @@ def main(repo, token, branch, repos):
             elif project_column:
                 project_column = '- ' + colored(project_column, 'green')
 
-
             print(f"\t     | Milestone: {milestone} {project_column}\t{assignees}")
 
             if repo_ok and gh_pull.merge_commit_sha:
-                (exitcode, output) = subprocess.getstatusoutput(f"git --git-dir={repos}/{repo}/.git tag --sort=committerdate --contains={gh_pull.merge_commit_sha}")
+                gitcmd = f"git --git-dir={repos}/{repo}/.git tag --sort=committerdate --contains={gh_pull.merge_commit_sha}"
+                (exitcode, output) = subprocess.getstatusoutput(gitcmd)
                 if output and exitcode == 0:
                     # show latest GA release tag if possible; otherwise just the latest alpha/beta/rc containing this commit
                     ga_tag = ''
@@ -123,11 +123,13 @@ def main(repo, token, branch, repos):
             if gh_issue.state == "closed":
                 print(f"\t     | Closed by: @{gh_issue.closed_by.login}")
 
+
 def semver(version):
-    m = re.search('(\d+\.\d+\.\d+)', version)
+    m = re.search(r'(\d+\.\d+\.\d+)', version)
     if m:
         return m.group(0)
     return version
+
 
 def get_events(self):
     return github.PaginatedList.PaginatedList(
@@ -137,6 +139,7 @@ def get_events(self):
         None,
         headers={"Accept": "application/vnd.github.starfox-preview+json"},
     )
+
 
 if __name__ == "__main__":
     try:
