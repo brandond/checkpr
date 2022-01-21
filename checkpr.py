@@ -7,6 +7,7 @@ import click
 import github
 import subprocess
 import os.path
+from yaml import load, SafeLoader
 from github import Github
 from termcolor import colored
 
@@ -21,7 +22,7 @@ def main(repo, token, branch, repos):
     gh = Github(token)
 
     gh_repo = gh.get_repo(repo)
-    kwargs = {}
+    kwargs = {'sort': 'updated', 'direction': 'desc'}
 
     if branch:
         kwargs['base'] = branch
@@ -97,7 +98,7 @@ def main(repo, token, branch, repos):
 
             if 'Done' in project_column:
                 project_column = '- ' + colored(project_column, 'red')
-            elif 'Test' in project_column:
+            elif 'Test' in project_column or 'Waiting for RC' in project_column:
                 project_column = '- ' + colored(project_column, 'yellow')
             elif project_column:
                 project_column = '- ' + colored(project_column, 'green')
@@ -141,8 +142,16 @@ def get_events(self):
     )
 
 
+def load_config():
+    hosts = os.path.expanduser("~/.config/gh/hosts.yml")
+    if os.path.exists(hosts):
+        hosts = load(open(hosts), Loader=SafeLoader)
+        os.environ['GITHUB_TOKEN'] = hosts.get("github.com", {}).get("oauth_token", "")
+
+
 if __name__ == "__main__":
     try:
+        load_config()
         main()
     except github.GithubException as ex:
         print(f"Github API error {ex.status}: {ex.data['message']}")
